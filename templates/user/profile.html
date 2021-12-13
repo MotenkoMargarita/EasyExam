@@ -1,0 +1,175 @@
+{% from 'macro/macro.html' import headBegin with context %}
+{% from 'macro/macro.html' import headEnd with context %}
+{% from 'macro/macro.html' import nav with context %}
+{% from 'macro/macro.html' import footer with context %}
+{% from 'macro/macro.html' import end with context %}
+
+{{ headBegin() }}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+<script src="/static/js/password.js"></script>
+<script src="/static/js/region.js"></script>
+<script src="/static/js/profileImage.js"></script>
+<script src="/static/js/profile.js"></script>
+
+<title>Подготовка к ЕГЭ</title>
+{{ headEnd() }}
+
+{{ nav() }}
+
+<div class="container">
+
+    {% for message in get_flashed_messages() %}
+        {% if message != "Письмо для изменения пароля успешно отправлено" and message != "Данные успешно сохранены" %}
+            <div class="alert alert-warning mt-3" role="alert">
+                {{ message }}
+            </div>
+        {% else %}
+            <div class="alert alert-success mt-3" role="alert">
+                {{ message }}
+            </div>
+        {% endif %}
+    {% endfor %}
+
+    <div class="alert alert-warning mt-3" role="alert" id="alertForImages" style="display: none;">
+    </div>
+
+    <form action="{{ url_for('change_profile') }}" method="POST" class="mt-3">
+
+        <div class="mb-3 row">
+            <label for="staticEmail" class="col-sm-2 col-form-label"><font face="Arial Black" color="#ff6347">📧 Email</font></label>
+            <div class="col-sm-10">
+              <font face="Broadway" size="4"> <input type="email" readonly class="form-control-plaintext" id="staticEmail"
+                       value="{{ current_user.email }}" disabled></font>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <label for="first_name" class="col-sm-2 col-form-label"><font face="Arial Black" color="#8b0000">🎓 Имя</font></label>
+            <div class="col-sm-10">
+                <font  face="Broadway" size="4"> <input type="text" class="form-control" id="first_name" name="first_name"
+                                                 value="{{ current_user.first_name }}"></font>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <label for="last_name" class="col-sm-2 col-form-label"><font face="Arial Black" color="#8b0000"> 🎓  Фамилия</font></label>
+            <div class="col-sm-10">
+                <font  face="Broadway" size="4"> <input type="text" class="form-control" id="last_name" name="last_name"
+                                                 value="{{ current_user.last_name }}"></font>
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label for="staticEmail" class="col-sm-2 col-form-label"><font face="Arial Black" color="#8b4513">📅 Дата регистрации</font></label>
+            <div class="col-sm-10">
+              <font face="Arial">  <input type="text" readonly class="form-control-plaintext" id="staticEmail"
+                 value="{{ (current_user.registration_date|string )[:-15] }} (ГГГГ-ДД-ММ)" disabled></font>
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label for="ident" class="col-sm-2 col-form-label"><font face="Arial Black" color="#8b008b">🆔 Идентефикатор</font></label>
+            <div class="col-sm-10">
+                <font face="Arial"> <input type="text" readonly class="form-control-plaintext" id="ident"
+                                                 value="{{ (current_user.identifier ) }}" onclick="copyIdentifier()"></font>
+            </div>
+        </div>
+
+        <div class=" mb-3 form-group">
+            <label for="region_select" class="col-sm-2 col-form-label"><font face="Arial Black" color="#00008b"> 🌏 Субъект федерации</font></label>
+
+            <select class="col-sm-10 form-select" name="region_id" id="region_select"
+                    onchange="getCities('{{ link }}')">
+                <option selected value="0">Выберите ваш субьект</option>
+                {% for region in regions %}
+                    {% if current_user.city.region == region %}
+                        <option value="{{ region.id }}" selected>{{ region.name }}</option>
+                    {% else %}
+                        <option value="{{ region.id }}">{{ region.name }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3 form-group">
+            <label class="form-label"><font face="Arial Black" color="#8b4513"> 🌇 Населенный пункт</font></label>
+            <select class="form-select mr-sm-2" id="city_select" name="city_id">
+                <option onload="getCities('{{ link }}')"
+                        value="{{ current_user.city.id }}">{{ current_user.city.name }}</option>
+            </select>
+            <div class="form-text">Если вы не нашли ваш населенный пункт, выберите ближайший к вам</div>
+        </div>
+
+        <div class="mb-3 row">
+            <label for="img" class="col-sm-2 col-form-label" style="display: flex; justify-content: center;">
+                <img
+                        src="{{ url_for('static', filename= "image/uploads/" + current_user.src) }}"
+                        alt="{{ current_user.first_name }} {{ current_user.last_name }}"
+                        style="height: 128px; width: 128px;  max-height: 128px; max-width: 128px; border-radius: 50%;"
+                        id="profileImage">
+            </label>
+            <div class="col-sm-10" style="display: flex; align-items: center">
+                <input onchange="changeImage()" class="form-control" type="file" id="inputForImage">
+            </div>
+
+            <input hidden type="text" value="{{ current_user.src }}" id="imgSrc" name="imgSrc">
+        </div>
+
+        {% if current_user.role.name != 'Admin' and current_user.role.name != 'Admin' %}
+            <div class="mb-3">
+                <label class="form-label">Ваши учителя:</label>
+
+                <table class="table table-hover mt-3">
+                    <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Полное имя учителя</th>
+                        <th scope="col">Email</th>
+                    </tr>
+
+                    </thead>
+                    <tbody>
+                    {% for teacher in teachers %}
+                        <tr>
+                            <th scope="row">
+                                {{ loop.index }}
+                            </th>
+                            <td>
+                                {{ teacher.first_name }} {{ teacher.last_name }}
+                            </td>
+                            <td>
+                                {{ teacher.email }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+
+
+        <div class="d-grid gap-3 mb-3">
+            <button class="btn btn-outline-primary" type="submit">Сохранить изменения</button>
+
+            <a href="{{ url_for('profile_reset_password') }}" class="btn btn-outline-warning" type="button">Изменить
+                пароль</a>
+
+            <a href="{{ url_for('profile') }}" type="button" class="btn btn-outline-secondary">Отменить изменения</a>
+
+            {% if current_user.role.name == 'Admin' or current_user.role.name == 'Teacher' %}
+                <a href="{{ url_for('teacher_panel') }}" type="button" class="btn btn-outline-info">Страница учителя</a>
+            {% endif %}
+
+            {% if current_user.role.name == 'Admin' %}
+                <a href="{{ url_for('admin_panel') }}" type="button" class="btn btn-outline-dark">Админ панель</a>
+            {% endif %}
+
+
+
+            <a href="{{ url_for('logout') }}" type="button" class="btn btn-outline-danger">Выйти</a>
+
+        </div>
+
+
+    </form>
+
+</div>
+
+{{ end() }}

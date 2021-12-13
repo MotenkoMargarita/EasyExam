@@ -1,0 +1,96 @@
+{% from 'macro/macro.html' import headBegin with context %}
+{% from 'macro/macro.html' import headEnd with context %}
+{% from 'macro/macro.html' import nav with context %}
+{% from 'macro/macro.html' import footer with context %}
+{% from 'macro/macro.html' import end with context %}
+
+{{ headBegin() }}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+<script src="/static/js/password.js"></script>
+<script src="/static/js/region.js"></script>
+<script src="/static/js/profileImage.js"></script>
+<script src="/static/js/profile.js"></script>
+
+<title>Подготовка к ЕГЭ</title>
+{{ headEnd() }}
+
+{{ nav() }}
+
+<div class="container">
+
+    {% for message in get_flashed_messages() %}
+        <div class="alert alert-success mt-3" role="alert">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    <table class="table table-hover mt-3">
+        <thead>
+        <tr>
+            <th scope="col"><font  color="#a52a2a" face="Arial Black"> 📖 Предмет</font></th>
+            <th scope="col"><font color="#a52a2a" face="Arial Black"> ✅ Первычиный балл</font></th>
+            <th scope="col"><font  color="#a52a2a" face="Arial Black"> 💯 Тестовый балл</font></th>
+            <th scope="col"><font  color="#a52a2a" face="Arial Black"> 🕙 Потрачено времени</font></th>
+            <th scope="col"><font  color="#a52a2a" face="Arial Black"> ⌛ Статус</font></th>
+            <th scope="col"><font  color="#a52a2a" face="Arial Black"> 📝 Просмотр работы</font></th>
+        </tr>
+
+        </thead>
+        <tbody>
+        {% for result in results|sort(attribute='is_checked') %}
+            {% if result.is_checked or not result.teacher_id %}
+                <tr class="table-success">
+                    {% else %}
+                <tr class="table-danger">
+            {% endif %}
+        <td>
+            {{ result_id_subject[result.id].name }}
+        </td>
+        <td>
+            {% if result.result_first_mark %}
+                {{ result.result_first_mark }} / {{ result_id_test[result.id].max_first_score }}
+            {% else %}
+                {{ result.first_part_first_mark }} /
+                {{ result_id_test[result.id].max_first_score }}
+            {% endif %}
+        </td>
+        <td>
+            {% if result.result_test_mark %}
+                {{ result.result_test_mark }} / {{ subject_id_max_marks[result_id_subject[result.id].id].test_score }}
+            {% else %}
+                {{ result.first_part_test_mark }} /
+                {{ subject_id_max_marks[result_id_subject[result.id].id].test_score }}
+            {% endif %}
+        </td>
+        <td>
+            {{ result.time_spent }}
+        </td>
+        {% if result.is_checked %}
+            <td>
+                Проверено
+            </td>
+            <td>
+                <a href="{{ url_for('result', result_id=result.id) }}" class="link-primary">Смотреть
+                    работу</a>
+            </td>
+        {% else %}
+            <td>
+                {% if result.teacher_id %}
+                    Не проверено
+                {% else %}
+                    Не было отправлено
+                {% endif %}
+            </td>
+            <td>
+                <a href="{{ url_for('result', result_id=result.id) }}" class="link-secondary">Смотреть
+                    работу</a>
+            </td>
+        {% endif %}
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+{{ end() }}

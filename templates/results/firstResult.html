@@ -1,0 +1,167 @@
+{% from 'macro/macro.html' import headBegin with context %}
+{% from 'macro/macro.html' import headEnd with context %}
+{% from 'macro/macro.html' import nav with context %}
+{% from 'macro/macro.html' import footer with context %}
+{% from 'macro/macro.html' import end with context %}
+{% from 'macro/macro.html' import mathjaxToShow with context %}
+
+{{ headBegin() }}
+<script src="/static/js/test.js"></script>
+
+<title>Подготовка к ЕГЭ</title>
+{{ mathjaxToShow() }}
+{{ headEnd() }}
+
+{{ nav() }}
+
+<div class="container">
+    {% for message in get_flashed_messages() %}
+        <div class="alert alert-warning mt-3" role="alert">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    <div class="mt-3 mb-3 d-flex justify-content-between">
+        <h2><font color="maroon" size="4"> 📖 {{ subject.name }} : 📝 {{ test_type.name }}</font></h2>
+        <h2>
+            <div><font size="5" face="Impact" color="#a0522d">⌛ Потрачено времени {{ result.time_spent }}</font></div>
+        </h2>
+    </div>
+
+    <div class="mt-3 mb-3 d-flex justify-content-between">
+        <h2 > <font size="5"> 🏆 Ваш результат:
+       <font color="#dc143c">{{ result.first_part_first_mark }}</font>  первичных балла</font>  <!--⚡
+         <font color="#dc143c"> {{ result.first_part_test_mark }}</font> тестовых --></h2>
+    </div>
+
+    <form action="{{ url_for('send_to_teacher') }}" method="POST" enctype="multipart/form-data">
+
+        <input type="hidden" name="timeLeft" id="timeLeft">
+        {% for question in test.questions | sort(attribute='number') %}
+            {% if question_number_question_info[question.number].questionType_id == 1 %}
+                <!-- Первая часть -->
+                {% if question_id_answer[question.id] == question.answer %}
+                    <div class="card border-success mb-3">
+                {% else %}
+                    <div class="card border-danger mb-3">
+                {% endif %}
+            <h5 class="card-header">
+                {% for subject in subjects %}
+                    {% if question.subject_id == subject.id %}
+                        {{ subject.name }}.
+                    {% endif %}
+                {% endfor %}
+               <font  color="maroon"> ✍ Задание №
+                {{ question.number }}</font>
+            </h5>
+            <div class="card-body">
+                <div>
+                    <div class="mb-3">
+                        <label class="form-label"><font size="3" face="Impact" color="maroon">Текст задания:</font> </label>
+                        <div class="spaces" id="textTextAreaResult{{ question.id }}">
+                          <font size="5" face="Arial"> {{ question.text }}</font>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        {% for image in question.images %}
+                            <img src="{{ url_for('static', filename= "image/uploads/" + image.source) }}"
+                                 class="rounded mx-auto d-block mb-3" id="questionImage1"
+                                 style="max-width: 100%; max-height: 300px; min-height: 200px;">
+                        {% endfor %}
+                    </div>
+
+                    {% if question_id_answer[question.id] == question.answer %}
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label" style="color: darkgreen"><font size="4" face="Arial Black">✅ Ответ: </font></label>
+                            <div class="col-sm-10">
+                               <font size="5"> <input type="text" class="form-control-plaintext"
+                                       name="question{{ question.id }}"
+                                       value="{{ question_id_answer[question.id] }}" disabled></font>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label" style="color: crimson"><font size="4" face="Arial Black"> ❌ Ваш ответ: </font></label>
+                            <div class="col-sm-10">
+                                <font size="5"> <input type="text" class="form-control-plaintext"
+                                       name="question{{ question.id }}"
+                                                       value="{{ question_id_answer[question.id] }}" disabled></font>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label" style="color: darkgreen"><font size="4" face="Arial Black">✅ Верный ответ: </font></label>
+                            <div class="col-sm-10">
+                             <font size="5">    <input type="text" class="form-control-plaintext"
+                                       name="question{{ question.id }}"
+                                                       value="{{ question.answer }}" disabled></font>
+                            </div>
+                        </div>
+                    {% endif %}
+
+
+                </div>
+            </div>
+            </div>
+                <!-- /Первая часть -->
+            {% else %}
+                <!-- Вторая часть -->
+                <div class="card mb-3">
+                    <h5 class="card-header">
+                        {% for subject in subjects %}
+                            {% if question.subject_id == subject.id %}
+                                {{ subject.name }}.
+                            {% endif %}
+                        {% endfor %}
+                        <font  color="maroon"> ✍ Задание
+                            {{ question.number }}</font>
+                    </h5>
+                    <div class="card-body">
+                        <div>
+                            <div class="mb-3">
+                                <label class="form-label"><font size="3" face="Impact" color="maroon">Текст задания:</font> </label>
+                                <div class="spaces" id="textTextAreaResult{{ question.id }}">
+                                    <font size="5" face="Arial"> {{ question.text }}</font>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                {% for image in question.images %}
+                                    <img src="{{ url_for('static', filename= "image/uploads/" + image.source) }}"
+                                         class="rounded mx-auto d-block mb-3" id="questionImage{{ image.id }}"
+                                         style="max-width: 100%; max-height: 300px; min-height: 200px;">
+                                {% endfor %}
+                            </div>
+                            <div class="mb-3">
+                                <h5 class="text-center">⌛ Это задание проверяется преподавателем</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /Вторая часть -->
+            {% endif %}
+        {% endfor %}
+
+        {% if teachers %}
+            <div class="mb-3">
+                <label class="form-label">⚠ Выберите учителя , который будет проверять вашу работу</label>
+                <select class="form-select mr-sm-2" name="teacher_id">
+                    <option value="0">📎 Выберите учителя</option>
+                    {% for teacher in teachers %}
+                        <option value="{{ teacher.id }}">{{ teacher.first_name }} {{ teacher.last_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="d-grid gap-3  mb-3">
+                <input type="hidden" name="result_id" value="{{ result.id }}">
+                <button type="submit" class="btn btn-primary"><font size="4"> 📩 Отправить на проверку</font></button>
+            </div>
+        {% else %}
+            <div class="mb-3">
+                <h3 class="text-center">😨 У вас нет учителя, который может проверить работу</h3>
+            </div>
+        {% endif %}
+    </form>
+
+</div>
+
+{{ end() }}

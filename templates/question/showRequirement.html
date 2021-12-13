@@ -1,0 +1,75 @@
+{% from 'macro/macro.html' import headBegin with context %}
+{% from 'macro/macro.html' import headEnd with context %}
+{% from 'macro/macro.html' import nav with context %}
+{% from 'macro/macro.html' import footer with context %}
+{% from 'macro/macro.html' import end with context %}
+{% from 'macro/macro.html' import mathjaxToShow with context %}
+
+
+{{ headBegin() }}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+<script src="/static/js/questionRequirements.js"></script>
+
+<title>Подготовка к ЕГЭ</title>
+{{ mathjaxToShow() }}
+{{ headEnd() }}
+
+{{ nav() }}
+
+<div class="container">
+
+    {% for message in get_flashed_messages() %}
+        <div class="alert alert-warning mt-3" role="alert">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    <div class="card mb-3 mt-3">
+        <h5 class="card-header"><font color="maroon" size="5">
+            📖 {{ subject.name }}
+            Вопрос №
+            {{ question_number }} </font>
+        </h5>
+        <div class="card-body">
+         <!--   <div class="">
+                <div class="mb-3">
+                    <label for="subject_select" class="form-label">Предмет</label>
+                    <option value="0" selected>{{ subject.name }}</option>
+                </div>
+                <div class="mb-3">
+                    <label for="number" class="form-label">Номер вопроса</label>
+                    <option selected
+                            value="{{ question_number }}">{{ question_number }}</option>
+                </div>-->
+
+                <div>
+                    <label class="form-label"><font size="3" face="Arial Black" color="maroon">Текст задания:</font></label>
+                    <div class="spaces"
+                         id="textTextAreaResult{{ question_requirement.id }}">  <font size="5" face="Arial"> {{ question_requirement.text }}</font></div>
+                </div>
+
+                <div>
+                    <label class="form-label mt-3"><font size="5" face="Arial Black" color="maroon"> ⚠ Критерии</font></label>
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th scope="col"><font size="4" face="Arial Black" color="#ff8c00">📃 Критерий</font></th>
+                            <th scope="col"><font size="4" face="Arial Black" color="#8b0000">💯 Балл</font></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for criteria in question_requirement.criteria|sort(attribute='value', reverse = True) %}
+                            <tr>
+                                <td class="col-8 spaces" id="resultInTable{{ criteria.id }}">{{ criteria.text }}</td>
+                                <td class="col-2" id="resultValueInTable{{ criteria.id }}">{{ criteria.value }}</td>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{ end() }}

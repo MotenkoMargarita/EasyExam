@@ -1,0 +1,245 @@
+{% from 'macro/macro.html' import headBegin with context %}
+{% from 'macro/macro.html' import headEnd with context %}
+{% from 'macro/macro.html' import nav with context %}
+{% from 'macro/macro.html' import footer with context %}
+{% from 'macro/macro.html' import end with context %}
+{% from 'macro/macro.html' import mathjaxToShow with context %}
+
+
+{{ headBegin() }}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+<script src="/static/js/questionRequirements.js"></script>
+
+<title>Подготовка к ЕГЭ</title>
+{{ mathjaxToShow() }}
+{{ headEnd() }}
+
+{{ nav() }}
+
+<div class="container">
+
+    {% for message in get_flashed_messages() %}
+        <div class="alert alert-warning mt-3" role="alert">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    <form class="mt-3" action="{{ url_for('add_question_req') }}" method="POST">
+        <div class="mb-3">
+            <label for="subject_select" class="form-label">Предмет</label>
+            <select class="form-select mr-sm-2" name="subject_id" id="subject_select"
+                    onchange="addQuestionNumbersForCreateForm('{{ link }}')">
+                <option value="0" selected>Выберите предмет</option>
+                {% for subject in subjects %}
+                    <option value="{{ subject.id }}">{{ subject.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="number" class="form-label">Номер вопроса</label>
+            <select class="form-select mr-sm-2" id="number" name="number">
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="text" class="form-label">Текст</label>
+            <textarea class="form-control mb-3" aria-describedby="text" name="text" required id="textTextArea"
+                      onkeyup="showResult(this.value, 'textTextAreaResult')"></textarea>
+            <label class="form-label">
+                <a data-bs-toggle="collapse" href="#collapseResult" role="button"
+                   aria-expanded="false" aria-controls="collapseResult">
+                    Результат
+                </a>
+            </label>
+
+            <div class="collapse" id="collapseResult">
+                <div class="card card-body">
+                    <div id="textTextAreaResult"></div>
+                </div>
+            </div>
+
+
+        </div>
+
+        <div id="criteria">
+            <label class="form-label">Критерии</label>
+            <div class="card mb-3" id="addButtons">
+                <div class="card-body">
+                    <div class="d-grid gap-3">
+                        <button type="button" class="btn btn-outline-success" onclick="addNewCriteria()"><i
+                                class="bi bi-plus"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" name="criteriaCount" value="0" id="criteriaCount">
+        <button type="submit" class="btn btn-primary mb-3">Добавить</button>
+    </form>
+
+    <a class="btn btn-outline-info" data-bs-toggle="collapse" href="#collapse" role="button"
+       aria-expanded="false" aria-controls="collapse">
+        Поиск
+    </a>
+
+    <div class="collapse" id="collapse">
+        <div class="card card-body mt-3">
+            <form class="mt-3" action="{{ url_for('question_req') }}" method="GET">
+                <div class="mb-3">
+                    <label for="subject_select" class="form-label">Предмет</label>
+            <select class="form-select mr-sm-2" name="subject_id" id="subject_select">
+                <option value="0" selected>Выбирите предмет</option>
+                {% for subject in subjects %}
+                    <option value="{{ subject.id }}">{{ subject.name }}</option>
+                {% endfor %}
+            </select>
+                </div>
+                <div class="mb-3">
+                    <label for="number" class="form-label">Номер вопроса</label>
+                    <input type="text" class="form-control" id="number" aria-describedby="number" name="number">
+                </div>
+                <div class="mb-3">
+                    <label for="text" class="form-label">Текстовое поле</label>
+                    <input type="text" class="form-control" id="text" aria-describedby="text" name="text">
+                </div>
+
+                <button type="submit" class="btn btn-primary mb-3">Поиск</button>
+            </form>
+        </div>
+    </div>
+
+
+    {% for question_requirement in question_requirements %}
+        <form action="{{ url_for('change_question_req') }}" class="mt-3" method="POST">
+        <div class="card mb-3">
+            <h5 class="card-header">
+                {% for subject in subjects %}
+                    {% if question_requirement.subject_id == subject.id %}
+                        {{ subject.name }}.
+                    {% endif %}
+                {% endfor %}
+                Вопрос
+                {{ question_requirement.number }}
+            </h5>
+            <div class="card-body">
+                <div class="">
+                    <div class="mb-3">
+                        <label for="subject_select" class="form-label">Предмет</label>
+                        <select class="form-select mr-sm-2" name="subject_id"
+                                id="subject_select{{ question_requirement.id }}"
+                                onchange="addQuestionNumbers(
+                                        '{{ link }}',
+                                        '{{ question_requirement.id }}'
+                                        )"
+                        >
+                            <option value="0" selected>Выбирите предмет</option>
+                            {% for subject in subjects %}
+                                {% if question_requirement.subject_id == subject.id %}
+                                    <option selected value="{{ subject.id }}">{{ subject.name }}</option>
+                                {% else %}
+                                    <option value="{{ subject.id }}">{{ subject.name }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="number" class="form-label">Номер вопроса</label>
+                        <select class="form-select mr-sm-2" id="number{{ question_requirement.id }}" name="number"
+{#                                onclick="LoadNumbersAndSelectNumberOfCurrentRequirement(#}
+{#                                        '{{ link }}',#}
+{#                                        '{{ question_requirement.id }}',#}
+{#                                        '{{ question_requirement.number }}'#}
+{#                                        )">#}
+                        >
+                            <option selected
+                                    value="{{ question_requirement.number }}">{{ question_requirement.number }}</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Текст</label>
+                        <div class="spaces" id="textTextAreaResult{{ question_requirement.id }}">{{ question_requirement.text  }}</div>
+                    </div>
+
+                    <div>
+                        <a class="btn btn-outline-secondary" data-bs-toggle="collapse"
+                           href="#collapseShow{{ question_requirement.id }}" role="button"
+                           aria-expanded="false" aria-controls="collapseShow{{ question_requirement.id }}">
+                            Редактировать
+                        </a>
+                        <div class="collapse" id="collapseShow{{ question_requirement.id }}">
+                            <div class="card card-body mt-3">
+{#                                <form action="{{ url_for('question_req') }}" method="GET">#}
+                            <textarea class="form-control" aria-describedby="text" name="text" required
+                                      id="textTextArea{{ question_requirement.id }}"
+                                      onkeyup="showResult(this.value, 'textTextAreaResult{{ question_requirement.id }}')">{{ question_requirement.text }}</textarea>
+{#                                </form>#}
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="form-label mt-3">Критерии</label>
+                        <table class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th scope="col">Текст</th>
+                                <th scope="col">Балл</th>
+                                <th scope="col">Редактировать</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for criteria in question_requirement.criteria|sort(attribute='value', reverse = True) %}
+                                <tr>
+                                    <td class="col-8 spaces" id="resultInTable{{ criteria.id }}">{{ criteria.text }}</td>
+                                    <td class="col-2" id="resultValueInTable{{ criteria.id }}">{{ criteria.value }}</td>
+                                    <td class="col-2"><a
+                                            href="#collapseShowCriteria{{ question_requirement.id }}{{ criteria.id }}"
+                                            class="btn btn-outline-secondary" data-bs-toggle="collapse"
+                                            role="button"
+                                            aria-expanded="false"
+                                            aria-controls="collapseShowCriteria{{ question_requirement.id }}{{ criteria.id }}">
+                                        Редактировать
+                                    </a>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td colspan="3">
+                                        <div class="collapse"
+                                             id="collapseShowCriteria{{ question_requirement.id }}{{ criteria.id }}">
+
+                                            <label class="form-label">Текст</label>
+                                            <div>
+                            <textarea class="form-control" aria-describedby="text" name="text{{ criteria.id }}" required
+                                      id="textTextArea{{ question_requirement.id }}"
+                                      onkeyup="showResult(this.value, 'resultInTable{{ criteria.id }}')">{{ criteria.text }}</textarea>
+                                            </div>
+
+                                            <label class="form-label">Балл</label>
+                                            <input type="text" class="form-control"
+                                                   onkeyup="changeVisualValue(this.value, 'resultValueInTable{{ criteria.id }}')"
+                                                   value="{{ criteria.value }}" name="value{{ criteria.id }}">
+
+                                        </div>
+                                    </td>
+                                </tr>
+
+
+
+
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <input type="hidden" value="{{ question_requirement.id }}" name="question_req_id">
+            <div class="d-grid gap-2">
+                 <button type="submit" class="btn btn-outline-warning">Сохранить</button>
+                 <a href="{{ url_for('delete_question_req', question_req_id=question_requirement.id ) }}"  class="btn btn-outline-danger">Удалить</a>
+                </div>
+            </div>
+        </div>
+</form>
+    {% endfor %}
+
+</div>
+
+{{ end() }}

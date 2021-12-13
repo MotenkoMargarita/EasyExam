@@ -1,0 +1,125 @@
+{% from 'macro/macro.html' import headBegin with context %}
+{% from 'macro/macro.html' import headEnd with context %}
+{% from 'macro/macro.html' import nav with context %}
+{% from 'macro/macro.html' import footer with context %}
+{% from 'macro/macro.html' import end with context %}
+{% from 'macro/macro.html' import mathjaxToShow with context %}
+
+{{ headBegin() }}
+<script src="/static/js/themeTest.js"></script>
+
+<title>Подготовка к ЕГЭ</title>
+{{ mathjaxToShow() }}
+{{ headEnd() }}
+
+{{ nav() }}
+
+<div class="container">
+    {% for message in get_flashed_messages() %}
+        <div class="alert alert-warning mt-3" role="alert">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    <input type="hidden" value="{{ subject.time_limit }}" id="time">
+
+    <div class="mt-3 mb-3 d-flex justify-content-between">
+        <h2><font color="maroon" size="4"> 📖 {{ subject.name }} : 📝 {{ test_type.name }}</font></h2>
+        <h2> <font size="5" face="Arial Black" color="#d2691e"> 📚 {{ theme.name }}</font></h2>
+    </div>
+
+    <form action="{{ url_for('check_theme_test', theme_id=theme.id, subject_id=subject.id, test_id=test.id) }}"
+          id="test" method="POST" enctype="multipart/form-data">
+
+        <input type="hidden" name="timeSpent" id="timeSpent">
+        <script>timeCounterStart()</script>
+        {% for question in test.questions | sort(attribute='number') %}
+            {% if question_number_question_info[question.number].questionType_id == 1 %}
+                <!-- Первая часть -->
+                <div class="card mb-3">
+                    <h5 class="card-header">
+                        {% for subject in subjects %}
+                            {% if question.subject_id == subject.id %}
+                                {{ subject.name }}.
+                            {% endif %}
+                        {% endfor %}
+                        <font  color="maroon"> ✍ Задание {{ question.number }}
+                          <!-- ⚡  в ЕГЭ № <a target="_blank" href="{{ url_for('show_question', question_id=question.id) }}">{{ question.id }}</a>-->
+                        </font> </h5>
+                    <div class="card-body">
+                        <div>
+                            <div class="mb-3">
+                                <label class="form-label"><font size="3" face="Impact" color="maroon">Текст задания:</font></label>
+                                <div class="spaces" id="textTextAreaResult{{ question.id }}">
+                                    <font size="5" face="Arial"> {{ question.text }}</font>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                {% for image in question.images %}
+                                    <img src="{{ url_for('static', filename= "image/uploads/" + image.source) }}"
+                                         class="rounded mx-auto d-block mb-3" id="questionImage1"
+                                         style="max-width: 100%; max-height: 300px; min-height: 200px;">
+                                {% endfor %}
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-1 col-form-label"><font size="3" face="Arial Black">✅ Ответ: </font></label>
+                                <div class="col-sm-11">
+                                    <input type="text" class="form-control" name="question{{ question.id }}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /Первая часть -->
+            {% else %}
+                <!-- Вторая часть -->
+                <div class="card mb-3">
+                    <h5 class="card-header">
+                        {% for subject in subjects %}
+                            {% if question.subject_id == subject.id %}
+                                {{ subject.name }}.
+                            {% endif %}
+                        {% endfor %}
+                        <font  color="maroon"> ✍ Задание {{ question.number }}
+                           <!--  ⚡  в ЕГЭ № <a target="_blank" href="{{ url_for('show_question', question_id=question.id) }}">{{ question.id }}</a>-->
+                        </font> </h5>
+                    <div class="card-body">
+                        <div>
+                            <div class="mb-3">
+                                <label class="form-label"><font size="3" face="Impact" color="maroon">Текст задания:</font></label>
+                                <div class="spaces" id="textTextAreaResult{{ question.id }}">
+                                    <font size="5" face="Arial">  {{ question.text }}</font>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                {% for image in question.images %}
+                                    <img src="{{ url_for('static', filename= "image/uploads/" + image.source) }}"
+                                         class="rounded mx-auto d-block mb-3" id="questionImage{{ image.id }}"
+                                         style="max-width: 100%; max-height: 300px; min-height: 200px;">
+                                {% endfor %}
+                            </div>
+                            <div class="mb-3">
+                                <h5 class="text-center">⚠ Это задание проверяется преподавателем</h5>
+                                <h5 class="text-center">📌 Решение прикрепляется в конце теста</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /Вторая часть -->
+            {% endif %}
+        {% endfor %}
+
+        <div class="mb-3">
+            <label for="formFile" class="form-label">Выберите файл с решением</label>
+            <input class="form-control" type="file" id="formFile" name="solutionFile" onchange="checkInputFile(this)">
+        </div>
+
+        <div class="d-grid gap-3  mb-3">
+            <button type="submit" class="btn btn-primary">Проверить</button>
+        </div>
+
+    </form>
+
+</div>
+
+{{ end() }}

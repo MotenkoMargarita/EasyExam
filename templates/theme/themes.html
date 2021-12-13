@@ -1,0 +1,45 @@
+{% from 'macro/macro.html' import headBegin with context %}
+{% from 'macro/macro.html' import headEnd with context %}
+{% from 'macro/macro.html' import nav with context %}
+{% from 'macro/macro.html' import footer with context %}
+{% from 'macro/macro.html' import end with context %}
+
+
+{{ headBegin() }}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+<script src="/static/js/subject.js"></script>
+
+<title>Подготовка к ЕГЭ</title>
+{{ headEnd() }}
+
+{{ nav() }}
+
+<div class="container">
+    <div class="mt-3">
+    <div class="mb-3">
+        <h2 class="text-center" style="color: maroon">  📖 {{ subject.name }}</h2>
+    </div>
+        {% for theme in themes %}
+            <div class="card mb-3">
+                <h5 class="card-header" style="color: brown" >
+                  <font size="5" face="Arial Black"> 📚 {{ theme.name }}</font>
+                </h5>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label"><font size="4" color="#8b4513" face="Impact">Название</font></label>
+                        <input type="text" class="form-control" value="{{ theme.name }}" disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><font size="4" color="#8b4513" face="Impact">Описание</font></label>
+                        <input type="text" class="form-control" value="{{ theme.description }}" disabled>
+                    </div>
+                    <div class="d-grid gap-3">
+                        <a href="{{ url_for('theme', subject_id=subject.id, theme_id=theme.id) }}" class="btn btn-warning">Изучать</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+{{ end() }}

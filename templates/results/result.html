@@ -1,0 +1,216 @@
+{% from 'macro/macro.html' import headBegin with context %}
+{% from 'macro/macro.html' import headEnd with context %}
+{% from 'macro/macro.html' import nav with context %}
+{% from 'macro/macro.html' import footer with context %}
+{% from 'macro/macro.html' import end with context %}
+{% from 'macro/macro.html' import mathjaxToShow with context %}
+
+{{ headBegin() }}
+<script src="/static/js/test.js"></script>
+
+<title>Подготовка к ЕГЭ</title>
+{{ mathjaxToShow() }}
+{{ headEnd() }}
+
+{{ nav() }}
+
+<div class="container">
+    {% for message in get_flashed_messages() %}
+        <div class="alert alert-warning mt-3" role="alert">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    <div class="mt-3 mb-3 d-flex justify-content-between">
+        <h2 style="color: maroon"><font face="Impact">📖 {{ subject.name }} : 📝 {{ test_type.name }}</font></h2>
+        <h2>
+            <div><font size="4" face="Impact" color="#a0522d">⌛ Потрачено времени {{ result.time_spent }}</font></div>
+        </h2>
+    </div>
+
+    <div class="mt-3 mb-3 d-flex justify-content-between">
+        {% if result.result_first_mark %}
+            <h2><font size="5"> 🏆 Ваш результат: <font color="#dc143c">{{ result.result_first_mark }}</font> первичных балла</font></h2>
+        {% else %}
+            <h2>Результат за первую часть: {{ result.first_part_first_mark }} первичных балла.
+                Или {{ result.first_part_test_mark }} тестовых</h2>
+        {% endif %}
+    </div>
+
+    {% if result.teacher_file %}
+        <div class="d-grid gap-3  mb-3">
+            <a href="{{ url_for('download_solution', filename=result.teacher_file) }}" target="_blank"
+               class="btn btn-warning">📩 Скачать заметки учителя</a>
+        </div>
+    {% else %}
+        <h5 class="text-center mb-3" style="color: maroon">🚫 Учитель не приложил заметки</h5>
+    {% endif %}
+
+    {% if result.solution_file %}
+        <div class="d-grid gap-3  mb-3">
+            <a href="{{ url_for('download_solution', filename=result.solution_file) }}" target="_blank"
+               class="btn btn-warning">📩 Скачать работу</a>
+        </div>
+    {% else %}
+        <div class="d-grid gap-3  mb-3">
+            <h5 class="text-center mb-3">❌ Нет файла с решением</h5>
+        </div>
+    {% endif %}
+
+
+    {% for question in test.questions | sort(attribute='number') %}
+        {% if question_number_question_info[question.number].questionType_id == 1 %}
+            <!-- Первая часть -->
+            {% if question_id_answer[question.id] == question.answer %}
+                <div class="card border-success mb-3">
+            {% else %}
+                <div class="card border-danger mb-3">
+            {% endif %}
+        <h5 class="card-header">
+            {% for subject in subjects %}
+                {% if question.subject_id == subject.id %}
+                    {{ subject.name }}.
+                {% endif %}
+            {% endfor %}
+            <font  color="maroon"> ✍ Задание №
+                {{ question.number }}</font>
+        </h5>
+        <div class="card-body">
+            {#                <div>#}
+            <div class="mb-3">
+                <label class="form-label"><font size="3"  color="maroon">Текст задания:</font></label>
+                <div class="spaces" id="textTextAreaResult{{ question.id }}">
+                    <font size="5" face="Arial">  {{ question.text }}</font>
+                </div>
+            </div>
+            <div class="mb-3">
+                {% for image in question.images %}
+                    <img src="{{ url_for('static', filename= "image/uploads/" + image.source) }}"
+                         class="rounded mx-auto d-block mb-3" id="questionImage1"
+                         style="max-width: 100%; max-height: 300px; min-height: 200px;">
+                {% endfor %}
+            </div>
+
+            {% if question_id_answer[question.id] == question.answer %}
+                <div class="form-group row">
+                    <label class="col-sm-2 col-form-label">Ответ:</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control-plaintext"
+                               name="question{{ question.id }}"
+                               value="{{ question_id_answer[question.id] }}" disabled>
+                    </div>
+                </div>
+            {% else %}
+                <div class="form-group row">
+                    <label class="col-sm-2 col-form-label">style="color: crimson"><font size="4" face="Arial Black"> ❌ Ваш ответ: </font></label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control-plaintext"
+                               name="question{{ question.id }}"
+                               value="{{ question_id_answer[question.id] }}" disabled>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-2 col-form-label">style="color: darkgreen"><font size="4" face="Arial Black">✅ Верный ответ: </font></label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control-plaintext"
+                               name="question{{ question.id }}"
+                               value="{{ question.answer }}" disabled>
+                    </div>
+                </div>
+                {% if question_id_comment[question.id] %}
+                    <div class="mb-3">
+                        <label class="form-label">Комментарий:</label>
+                        {% if question_id_comment[question.id] %}
+                            <textarea class="form-control-plaintext" name="comment{{ question.id }}"
+                                      rows="2">{{ question_id_comment[question.id] }}</textarea>
+                        {% else %}
+                            <textarea class="form-control-plaintext" name="comment{{ question.id }}"
+                                      rows="2"></textarea>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+            {% endif %}
+
+
+            {#                </div>#}
+        </div>
+        </div>
+            <!-- /Первая часть -->
+        {% else %}
+            <!-- Вторая часть -->
+            <div class="card mb-3">
+                <h5 class="card-header">
+                    {% for subject in subjects %}
+                        {% if question.subject_id == subject.id %}
+                            {{ subject.name }}.
+                        {% endif %}
+                    {% endfor %}
+                    <font  color="maroon"> ✍ Задание №
+                        {{ question.number }}</font>
+                </h5>
+                <div class="card-body">
+                    <div>
+                        <div class="mb-3">
+                            <label class="form-label"><font size="3"  color="maroon">Текст задания:</font></label>
+                            <div class="spaces" id="textTextAreaResult{{ question.id }}">
+                                <font size="5" face="Arial"> {{ question.text }}</font>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            {% for image in question.images %}
+                                <img src="{{ url_for('static', filename= "image/uploads/" + image.source) }}"
+                                     class="rounded mx-auto d-block mb-3" id="questionImage{{ image.id }}"
+                                     style="max-width: 100%; max-height: 300px; min-height: 200px;">
+                            {% endfor %}
+                        </div>
+                        <div class="mb-3">
+
+                            {% if question_id_mark[question.id] %}
+                                <div class="mb-3">
+                                    <label class="form-label"><font size="3" color="#006400" face="Arial Black"> ✅ Балл:</font></label>
+                                     {% if question_id_mark[question.id] %}
+                                        <input type="text" class="form-control" name="mark{{ question.id }}"
+                                               value="{{ question_id_mark[question.id] }}">
+                                    {% else %}
+                                        <input type="text" class="form-control" name="mark{{ question.id }}">
+                                  {% endif %}
+                                </div>
+                            {% endif %}
+
+                            {% if question_id_comment[question.id] %}
+                                <div class="mb-3">
+                                    <label class="form-label"><font size="3" color="#a52a2a" face="Arial Black"> 📝 Комментарий:</font></label>
+                                   {% if question_id_comment[question.id] %}
+                                        <textarea class="form-control" name="comment{{ question.id }}"
+                                                  rows="2">{{ question_id_comment[question.id] }}</textarea>
+                                    {% else %}
+                                        <textarea class="form-control" name="comment{{ question.id }}"
+                                                  rows="2"></textarea>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /Вторая часть -->
+        {% endif %}
+    {% endfor %}
+
+    {% if comment %}
+        <div class="mb-3">
+            <label class="form-label">Итоговый комментарий:</label>
+            {% if comment %}
+                <textarea class="form-control-plaintext" name="comment" rows="2">{{ comment }}</textarea>
+            {% else %}
+                <textarea class="form-control-plaintext" name="comment" rows="2"></textarea>
+            {% endif %}
+        </div>
+    {% endif %}
+
+
+    </div>
+</div>
+
+{{ end() }}

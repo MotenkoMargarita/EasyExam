@@ -1,0 +1,81 @@
+{% from 'macro/macro.html' import headBegin with context %}
+{% from 'macro/macro.html' import headEnd with context %}
+{% from 'macro/macro.html' import nav with context %}
+{% from 'macro/macro.html' import footer with context %}
+{% from 'macro/macro.html' import end with context %}
+
+{{ headBegin() }}
+<title>Подготовка к ЕГЭ</title>
+{{ headEnd() }}
+
+{{ nav() }}
+
+<div class="container">
+
+    <div class="mt-3 mb-3">
+        <label class="form-label">Предмет:</label>
+        <input type="text" class="form-control-plaintext" value="{{ curr_subject.name }}" disabled>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Время:</label>
+        <input type="text" class="form-control-plaintext" value="{{ curr_subject.time_limit }}" disabled>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Количество вопросов:</label>
+        <input type="text" class="form-control-plaintext" value="{{ curr_subject.question_count }}" disabled>
+    </div>
+
+    <form action="{{ url_for('question_info_change', subject_id=curr_subject.id) }}" method="POST">
+
+        {% for qi in questions_info %}
+
+            <div class="row mb-3">
+                <div class="col-1">
+                    <input type="text" name="number{{ qi.id }}" value="{{ loop.index }}" class="form-control-plaintext"
+                           disabled>
+                </div>
+                <div class="col-5">
+                    <input type="text" name="max_mark{{ qi.id }}" placeholder="Первичный балл" required
+                           class="form-control" value="{{ qi.max_mark }}">
+                </div>
+                <div class="col-6">
+                    <select class="form-select" name="questionType_id{{ qi.id }}">
+                        {% for qt in question_types %}
+
+                            {% if qi.questionType_id == qt.id %}
+                                <option value="{{ qt.id }}" selected>{{ qt.name }}</option>
+                            {% else %}
+                                <option value="{{ qt.id }}">{{ qt.name }}</option>
+                            {% endif %}
+
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        {% endfor %}
+        <div class="mb-3">
+            <label class="form-label">Перввичные баллы -> вторичные баллы</label>
+        </div>
+        {% for fsts in first_score_test_score %}
+
+            <div class="row mb-3">
+                <div class="col-1">
+                    <input type="text" name="number{{ fsts.id }}" value="{{ loop.index - 1 }}"
+                           class="form-control-plaintext"
+                           disabled>
+                </div>
+                <div class="col-11">
+                    <input type="text" name="test_score{{ fsts.id }}" placeholder="Тестовый балл" required
+                           class="form-control" value="{{ fsts.test_score }}">
+                </div>
+            </div>
+        {% endfor %}
+
+
+        <div class="d-grid gap-3 mb-3">
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+        </div>
+    </form>
+</div>
+
+{{ end() }}

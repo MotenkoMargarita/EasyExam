@@ -1,0 +1,55 @@
+{% from 'macro/macro.html' import headBegin with context %}
+{% from 'macro/macro.html' import headEnd with context %}
+{% from 'macro/macro.html' import nav with context %}
+{% from 'macro/macro.html' import footer with context %}
+{% from 'macro/macro.html' import end with context %}
+
+
+{{ headBegin() }}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+<script src="/static/js/subject.js"></script>
+
+<title>Подготовка к ЕГЭ</title>
+{{ headEnd() }}
+
+{{ nav() }}
+
+<div class="container">
+
+    {% for message in get_flashed_messages() %}
+        <div class="alert alert-warning mt-3" role="alert">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    <table class="table table-hover mt-3">
+        <thead>
+        <tr>
+            <th scope="col"><font size="5" color="orange" face="Arial Black"> 📌 Название</font></th>
+            <th scope="col"><font size="5" color="#a52a2a" face="Arial Black">📚 Темы</font></th>
+            <th scope="col"><font size="5" color="#d2691e"  face="Arial Black" >✍ Экзамен</font></th>
+        </tr>
+
+        </thead>
+        <tbody>
+
+        {% for subject in subjects %}
+            <tr>
+                <td>
+                    <font size="5"  face="Times New Roman"><input type="text" class="form-control-plaintext" disabled value="📖 {{ subject.name }}" style="color: maroon"></font>
+                </td>
+                <td>
+                    <a href="{{ url_for('themes', subject_id=subject.id) }}" class="btn btn-danger">Теория</a>
+                </td>
+                <td>
+                    <a href="{{ url_for('tests', subject_id=subject.id) }}" class="btn btn-warning">Варианты</a>
+                </td>
+            </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+
+</div>
+
+{{ end() }}

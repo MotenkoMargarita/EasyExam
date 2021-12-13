@@ -1,0 +1,161 @@
+{% from 'macro/macro.html' import headBegin with context %}
+{% from 'macro/macro.html' import headEnd with context %}
+{% from 'macro/macro.html' import nav with context %}
+{% from 'macro/macro.html' import footer with context %}
+{% from 'macro/macro.html' import end with context %}
+{% from 'macro/macro.html' import mathjaxToShow with context %}
+
+
+{{ headBegin() }}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+
+<title>Подготовка ЕГЭ</title>
+{{ mathjaxToShow() }}
+{{ headEnd() }}
+
+{{ nav() }}
+
+<div class="container">
+
+    {% for message in get_flashed_messages() %}
+        <div class="alert alert-warning mt-3" role="alert">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    <!-- Вывод -->
+    <div class="card mt-3 mb-3">
+        <h5 class="card-header">
+            {% for subject in subjects %}
+                {% if question.subject_id == subject.id %}
+                  <font size="5"  face="Times New Roman" color="maroon">📖 {{ subject.name }}.</font>
+                {% endif %}
+            {% endfor %}
+            Вопрос №
+            {{ question.number }}
+        </h5>
+        <div class="card-body">
+            <div class="">
+               <!-- <div class="mb-3">
+                    <label for="subject_select" class="form-label" style="color: brown"><font size="3" face="Impact">Предмет</font></label>
+                    <font size="3" face="Times New Roman"><input class="form-control-plaintext" value="{{ question.subject.name }}" disabled></font>
+                </div>
+                <div class="mb-3" style="color: brown;">
+                  <font size="3" face="Impact">  <label for="number" class="form-label">Вопрос </label>
+                    <input class="form-control-plaintext" value=" № {{ question.number }}" disabled></font>
+                </div>
+
+                <div class="mb-3">
+                    <label for="source_select" class="form-label"><font size="3" face="Arial" color="#a0522d">📩 Источник</font></label>
+                    <div class="">
+                       <font size="3" face="Times New Roman">  {% if question.source %}
+                            <a href="{{ question.source.link }}">{{ question.source.name }}</a>
+                        {% else %}
+                           <p>Источник не указан</p></font>
+                        {% endif %}
+                    </div>-->
+
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label"><font size="5" face="Arial Black" color="maroon">📑 Задание</font></label>
+                    <div class="spaces" id="textTextAreaResult{{ question.id }}">
+                       <font size="5" face="Arial"> {{ question.text }} </font>
+                    </div>
+                </div>
+
+             <div class="mb-3">
+                    <label for="source_select" class="form-label"><font size="3" face="Arial" color="#a0522d">📩 Источник</font></label>
+                    <div class="">
+                       <font size="3" face="Times New Roman">  {% if question.source %}
+                            <a href="{{ question.source.link }}">{{ question.source.name }}</a>
+                        {% else %}
+                           <p>Источник не указан</p></font>
+                        {% endif %}
+                    </div>
+
+                <div class="mb-3">
+                    <label class="form-label"><font size="5" face="Arial Black" color="#006400">✅ Ответ</font></label>
+                    <div class="spaces" id="textTextAreaResultAnswer{{ question.id }}">
+                       <font size="5" face="Arial"> {{ question.answer }}</font>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    {% for image in question.images %}
+
+                        <img src="{{ url_for('static', filename= "image/uploads/" + image.source) }}"
+                             class="rounded mx-auto d-block mb-3" id="questionImage1"
+                             style="max-width: 100%; max-height: 300px; min-height: 200px;">
+                    {% endfor %}
+                </div>
+            </div>
+
+            {% if is_second %}
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('show_req', subject_id=question.subject_id, question_number=question.number) }}"
+                       class="btn btn-outline-secondary"><font size="5" face="Arial Black" color="#ff8c00"> ⚠ Критерии</font></a>
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+    <!-- /Вывод вопроса -->
+
+    {% if current_user.is_authenticated %}
+        {% if current_user.role.name == 'Admin' or current_user.role.name == 'Teacher' %}
+            <form action="{{ url_for('solution') }}" method="get">
+                <div class="d-grid gap-2">
+                    <input type="hidden" name="question_id" value="{{ question.id }}">
+                    <button type="submit" class="btn btn-primary mb-3">Добавить решение</button>
+                </div>
+            </form>
+        {% endif %}
+    {% endif %}
+
+
+    {% if question.solutions %}
+        <h2 class="text-center mb-3"><font size="5" face="Arial Black" color="#a52a2a">📝 Решения:</font></h2>
+        {% for sol in question.solutions %}
+            <div class="card border-dark mb-4">
+                <h5 class="card-header">
+                    <font size="3" face="Arial Black" color="#006400">   ✅ Решение № {{ loop.index }} </font>
+                </h5>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label"><font size="4" face="Arial Black" color="maroon"> Описание задания:</font></label>
+                        <font size="5" face="Arial Black">   <input type="text" class="form-control-plaintext" value="{{ sol.description }}" disabled></font>
+                    </div>
+
+                    <div class="mb-3">
+                        <font size="4" face="Arial Black" color="maroon"> <label for="text">Верное решение:</label></font>
+                        <font size="5" face="Arial" > <p class="spaces">{{ sol.text }}</p></font>
+                    </div>
+
+                    <div class="mb-3">
+                        {% for image in sol.images %}
+                            <img src="{{ url_for('static', filename= "image/uploads/" + image.source) }}"
+                                 class="rounded mx-auto d-block mb-3" id="solutionImage{{ sol.id }}"
+                                 style="max-width: 100%; max-height: 300px; min-height: 200px;">
+                        {% endfor %}
+                    </div>
+
+                    {% if sol.file %}
+                        <div class="d-grid gap-3 mb-3">
+                            <a href="{{ url_for('download_solution', filename=sol.file) }}"
+                               target="_blank"
+                               class="btn btn-outline-success">Скачать файл</a>
+                        </div>
+                    {% endif %}
+
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <h4 class="text-center">Решений пока нет</h4>
+    {% endif %}
+
+
+</div>
+
+{{ end() }}
